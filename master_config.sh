@@ -19,10 +19,8 @@ echo "Configuring salt"
 envsubst < /root/minion.conf > /etc/salt/minion.d/minion.conf
 service salt-minion restart
 while true; do
-    salt-key | grep $SALT_MASTER_MINION_ID
-    if [ $?=0 ]; then
-        break
-    fi   
+    salt-key | grep "$SALT_MASTER_MINION_ID" && break
+    sleep 5
 done
 sleep 5
 for i in `salt-key -l accepted | grep -v Accepted | grep -v "$SALT_MASTER_MINION_ID"`; do
