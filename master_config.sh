@@ -26,6 +26,6 @@ sleep 5
 for i in `salt-key -l accepted | grep -v Accepted | grep -v "$SALT_MASTER_MINION_ID"`; do
     salt-key -d $i -y
 done
-salt-call state.sls linux,openssh,salt,maas.cluster,maas.region
+salt-call state.sls linux,openssh,salt,maas.cluster,maas.region,keepalived,haproxy
 
 reboot
