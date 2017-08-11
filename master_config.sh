@@ -14,7 +14,7 @@ ifdown ens3; ifup ens3
 
 echo "Preparing metadata model"
 mount /dev/cdrom /mnt/
-cp -r /mnt/model/model6/* /srv/salt/reclass/
+cp -r /mnt/model/model/* /srv/salt/reclass/
 chown root:root /srv/salt/reclass/*
 umount /dev/cdrom
 
@@ -51,6 +51,6 @@ if [ $RC -eq 0 ] ; then
     docker stack deploy --compose-file docker-compose.yml jenkins
 fi
 
-salt-call state.sls linux,openssh,salt,maas.cluster,maas.region,keepalived,haproxy
+salt-call state.sls linux,openssh,salt,maas.cluster,maas.region,keepalived,haproxy,reclass
 
 reboot
