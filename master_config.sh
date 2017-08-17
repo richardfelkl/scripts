@@ -51,6 +51,7 @@ if [ $RC -eq 0 ] ; then
     docker stack deploy --compose-file docker-compose.yml jenkins
 fi
 
-salt-call state.sls linux,openssh,salt,maas.cluster,maas.region,keepalived,haproxy,reclass
+salt-call state.sls linux,openssh,salt
+salt-call state.sls maas.cluster,maas.region,keepalived,haproxy,reclass
 
 reboot
