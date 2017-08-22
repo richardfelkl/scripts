@@ -41,6 +41,25 @@ if [ $INFRA_CONFIG_ADDRESS != "10.167.4.15" ] ; then
     find /etc/docker/compose/* -type f -print0 | xargs -0 sed -i -e 's/10.167.4.15/'$INFRA_CONFIG_ADDRESS'/g'
 fi
 
+# update gerrit repos
+rm -rf /srv/glusterfs/jenkins/workspace/git-mirror-downstream-*
+rm /srv/glusterfs/jenkins/.ssh/known_hosts
+export HOME=/root
+git config --global user.email "bootstrap@mirantis.com"
+git config --global user.name "mirantis"
+cd /srv/glusterfs/gerrit/git/mcp-ci/pipeline-library.git
+GIT_WORK_TREE=./ git stash
+GIT_WORK_TREE=./ git remote add origin https://github.com/Mirantis/pipeline-library
+GIT_WORK_TREE=./ git pull origin master -r
+cd /srv/glusterfs/gerrit/git/mk/mk-pipelines.git
+GIT_WORK_TREE=./ git stash
+GIT_WORK_TREE=./ git remote add origin https://github.com/Mirantis/mk-pipelines
+GIT_WORK_TREE=./ git pull origin master -r
+cd /srv/glusterfs/gerrit/git/mk/decapod-pipelines.git
+GIT_WORK_TREE=./ git stash
+GIT_WORK_TREE=./ git remote add origin https://github.com/mateuszlos/decapod-pipelines
+GIT_WORK_TREE=./ git pull origin master -r
+
 systemctl status docker | grep inactive >/dev/null
 RC=$?
 if [ $RC -eq 0 ] ; then
