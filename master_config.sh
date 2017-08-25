@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-export SALT_MASTER_DEPLOY_IP=172.16.164.20
+export SALT_MASTER_DEPLOY_IP=172.16.164.15
 export SALT_MASTER_MINION_ID=cfg01.deploy-name.local
 export DEPLOY_NETWORK_GW=172.16.164.1
 export DEPLOY_NETWORK_NETMASK=255.255.255.192
@@ -34,6 +34,7 @@ for i in `salt-key -l accepted | grep -v Accepted | grep -v "$SALT_MASTER_MINION
     salt-key -d $i -y
 done
 
+# replace IPs
 if [ $CICD_CONTROL_ADDRESS != "10.167.4.90" ] ; then
     systemctl stop docker
     find /etc/docker/compose/* -type f -print0 | xargs -0 sed -i -e 's/10.167.4.90/'$CICD_CONTROL_ADDRESS'/g'
@@ -43,6 +44,9 @@ if [ $INFRA_CONFIG_ADDRESS != "10.167.4.15" ] ; then
     systemctl stop docker
     find /etc/docker/compose/* -type f -print0 | xargs -0 sed -i -e 's/10.167.4.15/'$INFRA_CONFIG_ADDRESS'/g'
 fi
+
+# set proxy for gerrit, jenkins, aptly
+find /etc/docker/compose/* -type f -print0 | xargs -0 sed -i -e 's/10.20.0.1/'$SALT_MASTER_DEPLOY_IP'/g'
 
 # update gerrit repos
 rm -rf /srv/glusterfs/jenkins/workspace/git-mirror-downstream-*
@@ -64,6 +68,7 @@ GIT_WORK_TREE=./ git remote add origin https://github.com/mateuszlos/decapod-pip
 GIT_WORK_TREE=./ git pull origin master -r
 
 
+# update gerrit
 systemctl status docker | grep inactive >/dev/null
 RC=$?
 if [ $RC -eq 0 ] ; then
@@ -72,6 +77,8 @@ if [ $RC -eq 0 ] ; then
     docker stack deploy --compose-file docker-compose.yml gerrit
     cd /etc/docker/compose/jenkins/
     docker stack deploy --compose-file docker-compose.yml jenkins
+    cd /etc/docker/compose/aptly/
+    docker stack deploy --compose-file docker-compose.yml aptly
 fi
 
 salt-call saltutil.refresh_pillar
