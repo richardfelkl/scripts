@@ -18,6 +18,9 @@ cp -r /mnt/model/model/* /srv/salt/reclass/
 chown root:root /srv/salt/reclass/*
 umount /dev/cdrom
 
+cd /srv/salt/reclass/classes/service
+ln -s /usr/share/salt-formulas/reclass/service/devops_portal
+
 echo "Configuring salt"
 #service salt-master restart
 envsubst < /root/minion.conf > /etc/salt/minion.d/minion.conf
@@ -60,6 +63,7 @@ GIT_WORK_TREE=./ git stash
 GIT_WORK_TREE=./ git remote add origin https://github.com/mateuszlos/decapod-pipelines
 GIT_WORK_TREE=./ git pull origin master -r
 
+
 systemctl status docker | grep inactive >/dev/null
 RC=$?
 if [ $RC -eq 0 ] ; then
@@ -70,7 +74,8 @@ if [ $RC -eq 0 ] ; then
     docker stack deploy --compose-file docker-compose.yml jenkins
 fi
 
+salt-call saltutil.refresh_pillar
+salt-call saltutil.sync_all
 salt-call state.sls linux,openssh,salt
 salt-call state.sls maas.cluster,maas.region,keepalived,haproxy,reclass
-
 reboot
