@@ -10,7 +10,6 @@ envsubst < /root/interfaces > /etc/network/interfaces
 ifdown ens3; ifup ens3
 
 echo "Configuring salt"
-#service salt-master restart
 systemctl disable salt-master.service
 envsubst < /root/minion.conf > /etc/salt/minion.d/minion.conf
-service salt-minion restart
+#service salt-minion restart
